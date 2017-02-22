@@ -1,9 +1,8 @@
 package alda.graph;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import javax.management.timer.Timer;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by loxtank on 2017-02-22.
@@ -37,28 +36,99 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
     }
 
     @Override
-    public boolean connect(Object node1, Object node2, int cost) {
-        return false;
+    public boolean connect(T node1,T node2, int cost) {
+        Node firstNode = nodes.get(node1);
+        Node secondNode = nodes.get(node2);
+        if (cost < 1) {
+            return false;
+        } else if (!nodes.containsKey(node1) || !nodes.containsKey(node2)) {
+            return false;
+        } else if (isConnected(node1, node2)){
+            firstNode.updateCost(secondNode, cost);
+            secondNode.updateCost(firstNode, cost);
+            return true;
+
+        } else {
+
+            firstNode.addConnection(secondNode, cost);
+            secondNode.addConnection(firstNode, cost);
+
+
+            return true;
+        }
     }
 
     @Override
-    public boolean isConnected(Object node1, Object node2) {
-        return false;
+    public boolean isConnected(T node1, T node2) {
+        Node nodeToCheck = nodes.get(node1);
+        Node node2ToCheck = nodes.get(node2);
+
+        return nodeToCheck != null && node2ToCheck != null && nodeToCheck.hasConnection(node2ToCheck);
     }
 
     @Override
-    public int getCost(Object node1, Object node2) {
-        return 0;
+    public int getCost(T node1, T node2) {
+        Node firstNode = nodes.get(node1);
+        Node secondNode = nodes.get(node2);
+        if (firstNode != null && secondNode != null) {
+            return firstNode.getCost(secondNode);
+        } else {
+            return -1;
+        }
+
     }
 
     @Override
-    public List depthFirstSearch(Object start, Object end) {
+    public List<T> depthFirstSearch(T start, T end) {
 
-        return null;
+
+        Node currentNode = nodes.get(start);
+        Node goalNode = nodes.get(end);
+        if (currentNode == null || goalNode == null) {
+            return new ArrayList<T>();
+
+        } else {
+            Stack<Node<T>> stack = new Stack();
+
+            stack.push(currentNode);
+
+            while (!stack.isEmpty()) {
+                if (!visitedNodes.contains(currentNode)) {
+                    boolean isGoal = kollaOchMarkera(currentNode, goalNode);
+
+                    if (isGoal) {
+                        return stack.stream().map(n -> n.getValue()).collect(Collectors.toList());
+                    } else {
+                        stack.pop();
+                        Node
+                    }
+                }
+
+
+            }
+        }
+        return new ArrayList<T>();
+    }
+
+
+    private boolean kollaOchMarkera(Node start, Node end){
+        if(visitedNodes.contains(start)){
+            return false;
+        }
+
+        visitedNodes.add(start);
+        if(start.equals(end)){
+            return true;
+
+        } else {
+            return  false;
+        }
+
+
     }
 
     @Override
-    public List breadthFirstSearch(Object start, Object end) {
+    public List breadthFirstSearch(T start, T end) {
         return null;
     }
 
@@ -72,11 +142,42 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
             this.value = value;
         }
         private U value;
-        private List<Connection<U>> connections;
+        private HashMap<Node<U>, Integer> connections = new HashMap<>();
+
+        public boolean hasConnection(Node<U> node) {
+            return connections.containsKey(node);
+        }
+
+        public boolean addConnection(Node other, Integer cost) {
+            connections.put(other, cost);
+            return true;
+        }
+
+        public void updateCost(Node otherNode, Integer cost) {
+            connections.put(otherNode, cost);
+        }
+
+        public int getCost(Node otherNode) {
+            Integer cost = connections.get(otherNode);
+
+            return cost != null ? cost : -1;
+        }
+
+        public U getValue() {
+            return value;
+        }
 
         private class Connection<V> {
             private Node<V> connected;
             private int cost;
+        }
+        private Node<U> nextNeighbour(){
+            for (Node<U> neighbour : connections.keySet()){
+                if (!visitedNodes.contains(neighbour)){
+                    return neighbour;
+                }
+            }
+            return null;
         }
 
     }

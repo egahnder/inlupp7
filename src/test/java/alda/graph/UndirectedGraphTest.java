@@ -39,7 +39,7 @@ public class UndirectedGraphTest {
         assertTrue(graph.add("K"));
     }
 
-    /*
+
     @Test
     public void testConnect() {
         addExampleNodes();
@@ -61,6 +61,8 @@ public class UndirectedGraphTest {
         assertEquals(3, graph.getCost("A", "G"));
         assertEquals(3, graph.getCost("G", "A"));
     }
+
+
 
     @Test
     public void testTooLowWeight() {
@@ -136,7 +138,7 @@ public class UndirectedGraphTest {
     public void testDepthFirstSearchFromAToJ() {
         testDepthFirstSearch("A", "J", 5);
     }
-
+/*
     @Test
     public void testDepthFirstSearchFromJToA() {
         testDepthFirstSearch("J", "A", 5);
