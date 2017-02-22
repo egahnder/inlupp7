@@ -39,6 +39,7 @@ public class UndirectedGraphTest {
         assertTrue(graph.add("K"));
     }
 
+    /*
     @Test
     public void testConnect() {
         addExampleNodes();
@@ -244,5 +245,6 @@ public class UndirectedGraphTest {
         assertEquals(6, totalEdges);
         assertEquals(16, totalCost);
     }
+    */
 
 }
