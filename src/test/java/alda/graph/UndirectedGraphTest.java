@@ -156,7 +156,7 @@ public class UndirectedGraphTest {
             testDepthFirstSearch(node, node, 1);
         }
     }
-/*
+
     private void testBreadthFirstSearch(String start, String end, int expectedathLength) {
         createExampleGraph();
         List<String> path = graph.breadthFirstSearch(start, end);
@@ -188,7 +188,7 @@ public class UndirectedGraphTest {
             testBreadthFirstSearch(node, node, 1);
         }
     }
-
+/*
     @Test
     public void testMinimumSpanningTree() {
         createExampleGraph();
