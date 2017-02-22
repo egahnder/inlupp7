@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
 
     private HashMap<T, Node<T>> nodes = new HashMap<>();
-    private HashSet<Node<T>> visitedNodes =  new HashSet<>();
 
 
     @Override
@@ -29,21 +28,21 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
             return false;
         } else {
 
-        Node<T> node = new Node(newNode);
-        nodes.put(newNode, node);
-        return true;
+            Node<T> node = new Node(newNode);
+            nodes.put(newNode, node);
+            return true;
         }
     }
 
     @Override
-    public boolean connect(T node1,T node2, int cost) {
+    public boolean connect(T node1, T node2, int cost) {
         Node firstNode = nodes.get(node1);
         Node secondNode = nodes.get(node2);
         if (cost < 1) {
             return false;
         } else if (!nodes.containsKey(node1) || !nodes.containsKey(node2)) {
             return false;
-        } else if (isConnected(node1, node2)){
+        } else if (isConnected(node1, node2)) {
             firstNode.updateCost(secondNode, cost);
             secondNode.updateCost(firstNode, cost);
             return true;
@@ -80,8 +79,7 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
 
     @Override
     public List<T> depthFirstSearch(T start, T end) {
-
-
+        HashSet<Node<T>> visitedNodes = new HashSet<>();
         Node currentNode = nodes.get(start);
         Node goalNode = nodes.get(end);
         if (currentNode == null || goalNode == null) {
@@ -91,23 +89,23 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
             Stack<Node<T>> stack = new Stack();
 
             stack.push(currentNode);
-            if (kollaOchMarkera(currentNode, goalNode)) {
-                            return stack.stream().map(n -> n.getValue()).collect(Collectors.toList());
+            if (checkAndMarkVisited(currentNode, goalNode, visitedNodes)) {
+                return stack.stream().map(n -> n.getValue()).collect(Collectors.toList());
             }
             while (!stack.isEmpty()) {
-                    Node<T> nextNeighbour = currentNode.nextNeighbour();
-                    if (nextNeighbour == null) {
-                        stack.pop();
-                        if (!stack.isEmpty()) {
-                            currentNode = stack.peek();
-                        }
-                    } else {
-                        stack.push(nextNeighbour);
-                        currentNode = nextNeighbour;
-                        boolean isGoal = kollaOchMarkera(currentNode, goalNode);
-                        if (isGoal) {
-                            return stack.stream().map(n -> n.getValue()).collect(Collectors.toList());
-                        }
+                Node<T> nextNeighbour = currentNode.nextNeighbour(visitedNodes);
+                if (nextNeighbour == null) {
+                    stack.pop();
+                    if (!stack.isEmpty()) {
+                        currentNode = stack.peek();
+                    }
+                } else {
+                    stack.push(nextNeighbour);
+                    currentNode = nextNeighbour;
+                    boolean isGoal = checkAndMarkVisited(currentNode, goalNode, visitedNodes);
+                    if (isGoal) {
+                        return stack.stream().map(n -> n.getValue()).collect(Collectors.toList());
+                    }
 
                 }
             }
@@ -116,26 +114,25 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
     }
 
 
-    private boolean kollaOchMarkera(Node start, Node end){
-        if(visitedNodes.contains(start)){
+    private boolean checkAndMarkVisited(Node start, Node end, HashSet<Node<T>> visitedNodes) {
+        if (visitedNodes.contains(start)) {
             return false;
         }
 
         visitedNodes.add(start);
-        if(start.equals(end)){
+        if (start.equals(end)) {
             return true;
 
         } else {
-            return  false;
+            return false;
         }
-
-
     }
 
     @Override
     public List<T> breadthFirstSearch(T start, T end) {
         HashMap<Node<T>, Node<T>> parents = new HashMap<>();
         Queue<Node<T>> queue = new LinkedList<>();
+        HashSet<Node<T>> visitedNodes = new HashSet<>();
 
         Node<T> currentNode = nodes.get(start);
         Node<T> goalNode = nodes.get(end);
@@ -146,22 +143,25 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
             queue.add(currentNode);
             while (!queue.isEmpty()) {
                 currentNode = queue.poll();
-                if (kollaOchMarkera(currentNode, goalNode)) {
+                if (checkAndMarkVisited(currentNode, goalNode, visitedNodes)) {
                     List<T> path = new ArrayList<>();
-                    while(currentNode != null){
+                    while (currentNode != null) {
                         path.add(currentNode.value);
                         currentNode = parents.get(currentNode);
                     }
                     Collections.reverse(path);
                     return path;
-                }else{
+                } else {
                     Set<Node<T>> children = currentNode.connections.keySet();
-                    for (Node<T> child : children){
-                        parents.put(child, currentNode);
+                    for (Node<T> child : children) {
+                        if (!visitedNodes.contains(child) && !parents.containsKey(child)) {
+                            queue.add(child);
+                            parents.put(child, currentNode);
+                        }
                     }
                 }
 
-        }
+            }
         }
         return new ArrayList<T>();
     }
@@ -175,6 +175,7 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
         public Node(U value) {
             this.value = value;
         }
+
         private U value;
         private HashMap<Node<U>, Integer> connections = new HashMap<>();
 
@@ -202,9 +203,9 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
         }
 
 
-        private Node<U> nextNeighbour(){
-            for (Node<U> neighbour : connections.keySet()){
-                if (!visitedNodes.contains(neighbour)){
+        private Node<U> nextNeighbour(HashSet<Node<T>> visitedNodes) {
+            for (Node<U> neighbour : connections.keySet()) {
+                if (!visitedNodes.contains(neighbour)) {
                     return neighbour;
                 }
             }
