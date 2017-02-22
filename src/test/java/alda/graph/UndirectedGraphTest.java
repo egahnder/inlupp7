@@ -138,7 +138,7 @@ public class UndirectedGraphTest {
     public void testDepthFirstSearchFromAToJ() {
         testDepthFirstSearch("A", "J", 5);
     }
-/*
+
     @Test
     public void testDepthFirstSearchFromJToA() {
         testDepthFirstSearch("J", "A", 5);
@@ -156,7 +156,7 @@ public class UndirectedGraphTest {
             testDepthFirstSearch(node, node, 1);
         }
     }
-
+/*
     private void testBreadthFirstSearch(String start, String end, int expectedathLength) {
         createExampleGraph();
         List<String> path = graph.breadthFirstSearch(start, end);

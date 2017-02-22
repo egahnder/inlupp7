@@ -15,7 +15,7 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
 
     @Override
     public int getNumberOfNodes() {
-        return 0;
+        return nodes.size();
     }
 
     @Override
@@ -91,20 +91,25 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
             Stack<Node<T>> stack = new Stack();
 
             stack.push(currentNode);
-
+            if (kollaOchMarkera(currentNode, goalNode)) {
+                            return stack.stream().map(n -> n.getValue()).collect(Collectors.toList());
+            }
             while (!stack.isEmpty()) {
-                if (!visitedNodes.contains(currentNode)) {
-                    boolean isGoal = kollaOchMarkera(currentNode, goalNode);
-
-                    if (isGoal) {
-                        return stack.stream().map(n -> n.getValue()).collect(Collectors.toList());
-                    } else {
+                    Node<T> nextNeighbour = currentNode.nextNeighbour();
+                    if (nextNeighbour == null) {
                         stack.pop();
-                        Node
-                    }
+                        if (!stack.isEmpty()) {
+                            currentNode = stack.peek();
+                        }
+                    } else {
+                        stack.push(nextNeighbour);
+                        currentNode = nextNeighbour;
+                        boolean isGoal = kollaOchMarkera(currentNode, goalNode);
+                        if (isGoal) {
+                            return stack.stream().map(n -> n.getValue()).collect(Collectors.toList());
+                        }
+
                 }
-
-
             }
         }
         return new ArrayList<T>();
