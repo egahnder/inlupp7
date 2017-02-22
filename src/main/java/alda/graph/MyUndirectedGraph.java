@@ -133,8 +133,37 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
     }
 
     @Override
-    public List breadthFirstSearch(T start, T end) {
-        return null;
+    public List<T> breadthFirstSearch(T start, T end) {
+        HashMap<Node<T>, Node<T>> parents = new HashMap<>();
+        Queue<Node<T>> queue = new LinkedList<>();
+
+        Node<T> currentNode = nodes.get(start);
+        Node<T> goalNode = nodes.get(end);
+        if (currentNode == null || goalNode == null) {
+            return new ArrayList<T>();
+
+        } else {
+            queue.add(currentNode);
+            while (!queue.isEmpty()) {
+                currentNode = queue.poll();
+                if (kollaOchMarkera(currentNode, goalNode)) {
+                    List<T> path = new ArrayList<>();
+                    while(currentNode != null){
+                        path.add(currentNode.value);
+                        currentNode = parents.get(currentNode);
+                    }
+                    Collections.reverse(path);
+                    return path;
+                }else{
+                    Set<Node<T>> children = currentNode.connections.keySet();
+                    for (Node<T> child : children){
+                        parents.put(child, currentNode);
+                    }
+                }
+
+        }
+        }
+        return new ArrayList<T>();
     }
 
     @Override
@@ -172,10 +201,7 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
             return value;
         }
 
-        private class Connection<V> {
-            private Node<V> connected;
-            private int cost;
-        }
+
         private Node<U> nextNeighbour(){
             for (Node<U> neighbour : connections.keySet()){
                 if (!visitedNodes.contains(neighbour)){
