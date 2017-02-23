@@ -2,11 +2,9 @@ package alda.graph;
 
 import javax.management.timer.Timer;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-/**
- * Created by loxtank on 2017-02-22.
- */
 public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
 
     private HashMap<T, Node<T>> nodes = new HashMap<>();
@@ -168,7 +166,38 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
 
     @Override
     public UndirectedGraph minimumSpanningTree() {
-        return null;
+        PriorityQueue<Connection<T>> connections = new PriorityQueue<>();
+        UndirectedGraph<T> newGraph = new MyUndirectedGraph<T>();
+        HashSet<Node<T>> connected = new HashSet<>();
+        if (nodes.keySet().iterator().hasNext()){
+            Node<T> first = nodes.values().iterator().next();
+            newGraph.add(first.getValue());
+            connections.addAll(first.connectify());
+            connected.add(first);
+            while (!connections.isEmpty()){
+                Connection<T> smallest = connections.poll();
+                Set<Node<T>> pair = smallest.getPair().getPair();
+                Iterator<Node<T>> it = pair.iterator();
+                Node<T> firstNode = it.next();
+                if (it.hasNext()){
+                    Node<T> secondNode = it.next();
+                    if (connected.contains(firstNode) ^ connected.contains(secondNode)){
+                        if(!newGraph.add(firstNode.getValue())){
+                            newGraph.add(secondNode.getValue());
+                            connected.add(secondNode);
+                            connections.addAll(secondNode.connectify());
+                        }else{
+                            connected.add(firstNode);
+                            connections.addAll(firstNode.connectify());
+                        }
+                        newGraph.connect(firstNode.getValue(), secondNode.getValue(), firstNode.getCost(secondNode));
+
+                    }
+                }
+            }
+
+        }
+        return newGraph;
     }
 
     private class Node<U> {
@@ -212,7 +241,64 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
             return null;
         }
 
+        private Collection<Connection<U>> connectify(){
+            Collection<Connection<U>> newConnections = new ArrayList<>();
+            for (Entry<Node<U>, Integer> entry : connections.entrySet()){
+                UnorderedPair<U> pair = new UnorderedPair<U>(this, entry.getKey());
+                newConnections.add(new Connection<U>(pair, entry.getValue()));
+            }
+            return newConnections;
+        }
+    }
+    private class UnorderedPair<P>{
+        Set<Node<P>> pair = new HashSet<>();
+        private UnorderedPair(Node<P> cyclicRoute){
+            pair.add(cyclicRoute);
+        }
+
+        private UnorderedPair(Node<P> first, Node<P> second){
+            pair.add(first);
+            pair.add(second);
+        }
+        private Set<Node<P>> getPair(){
+            return pair;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof UnorderedPair){
+                UnorderedPair tmp = (UnorderedPair) obj;
+                Set objPair = tmp.getPair();
+                return pair.equals(objPair);
+
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return pair.hashCode();
+        }
     }
 
+    private class Connection<C> implements Comparable<Connection<C>>{
+        UnorderedPair<C> pair;
+        int cost = -1;
+        private Connection(UnorderedPair<C> pair, int cost){
+            this.pair = pair;
+            this.cost = cost;
+        }
 
+        @Override
+        public int compareTo(Connection<C> o) {
+            return Integer.compare(cost, o.getCost());
+        }
+
+        private UnorderedPair<C> getPair(){
+            return pair;
+        }
+        private int getCost(){
+            return cost;
+        }
+    }
 }
