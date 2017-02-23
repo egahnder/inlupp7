@@ -247,4 +247,42 @@ public class UndirectedGraphTest {
         assertEquals(6, totalEdges);
         assertEquals(16, totalCost);
     }
+
+    @Test
+    public void testEdges() {
+        createExampleGraph();
+        assertEquals(15, graph.getNumberOfEdges());
+    }
+    @Test
+    public void testEmptyGraphEdges() {
+        assertEquals(0, graph.getNumberOfEdges());
+    }
+
+    @Test
+    public void testNoEdges() {
+        add("A");
+        assertEquals(0, graph.getNumberOfEdges());
+    }
+
+    @Test
+    public void testOneCircularEdge() {
+        add("A");
+        connect("A", "A", 2);
+        assertEquals(1, graph.getNumberOfEdges());
+    }
+
+    @Test
+    public void testOneEdge() {
+        add("A");
+        add("B");
+        connect("A", "B", 2);
+        assertEquals(1, graph.getNumberOfEdges());
+    }
+
+
+
+
+
+
+
 }

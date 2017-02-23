@@ -17,7 +17,14 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
 
     @Override
     public int getNumberOfEdges() {
-        return 0;
+        int edges = 0;
+
+        for (Node<T> node : nodes.values()) {
+            edges += node.getNumberOfConnections();
+
+        }
+
+        return edges/2;
     }
 
     @Override
@@ -229,6 +236,14 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
 
         public U getValue() {
             return value;
+        }
+
+        public int getNumberOfConnections() {
+            int numberofConnections = connections.size();
+            if (connections.containsKey(this)) {
+                numberofConnections++;
+            }
+            return numberofConnections;
         }
 
 
