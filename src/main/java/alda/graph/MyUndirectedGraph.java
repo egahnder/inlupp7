@@ -1,6 +1,5 @@
 package alda.graph;
 
-import javax.management.timer.Timer;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -41,8 +40,8 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
 
     @Override
     public boolean connect(T node1, T node2, int cost) {
-        Node firstNode = nodes.get(node1);
-        Node secondNode = nodes.get(node2);
+        Node<T> firstNode = nodes.get(node1);
+        Node<T> secondNode = nodes.get(node2);
 
         if (cost < 1) {
             return false;
@@ -65,16 +64,16 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
 
     @Override
     public boolean isConnected(T node1, T node2) {
-        Node firstNode = nodes.get(node1);
-        Node secondNode = nodes.get(node2);
+        Node<T> firstNode = nodes.get(node1);
+        Node<T> secondNode = nodes.get(node2);
 
         return firstNode != null && secondNode != null && firstNode.hasConnection(secondNode);
     }
 
     @Override
     public int getCost(T node1, T node2) {
-        Node firstNode = nodes.get(node1);
-        Node secondNode = nodes.get(node2);
+        Node<T> firstNode = nodes.get(node1);
+        Node<T> secondNode = nodes.get(node2);
 
         if (firstNode != null && secondNode != null) {
             return firstNode.getCost(secondNode);
@@ -87,8 +86,8 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
     @Override
     public List<T> depthFirstSearch(T start, T end) {
         HashSet<Node<T>> visitedNodes = new HashSet<>();
-        Node currentNode = nodes.get(start);
-        Node goalNode = nodes.get(end);
+        Node<T> currentNode = nodes.get(start);
+        Node<T> goalNode = nodes.get(end);
 
         if (currentNode == null || goalNode == null) {
             return new ArrayList<>();
@@ -123,7 +122,7 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
     }
 
 
-    private boolean checkAndMarkVisited(Node start, Node end, HashSet<Node<T>> visitedNodes) {
+    private boolean checkAndMarkVisited(Node<T> start, Node<T> end, HashSet<Node<T>> visitedNodes) {
         if (visitedNodes.contains(start)) {
             return false;
         }
@@ -180,23 +179,29 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
         PriorityQueue<Connection<T>> connections = new PriorityQueue<>();
         UndirectedGraph<T> newGraph = new MyUndirectedGraph<T>();
         HashSet<Node<T>> connected = new HashSet<>();
+
         if (nodes.keySet().iterator().hasNext()) {
             Node<T> first = nodes.values().iterator().next();
             newGraph.add(first.getValue());
             connections.addAll(first.connectify());
             connected.add(first);
+
             while (!connections.isEmpty()) {
                 Connection<T> smallest = connections.poll();
                 Set<Node<T>> pair = smallest.getPair().getPair();
                 Iterator<Node<T>> it = pair.iterator();
                 Node<T> firstNode = it.next();
+
                 if (it.hasNext()) {
                     Node<T> secondNode = it.next();
+
                     if (connected.contains(firstNode) ^ connected.contains(secondNode)) {
+
                         if (!newGraph.add(firstNode.getValue())) {
                             newGraph.add(secondNode.getValue());
                             connected.add(secondNode);
                             connections.addAll(secondNode.connectify());
+
                         } else {
                             connected.add(firstNode);
                             connections.addAll(firstNode.connectify());
@@ -223,16 +228,16 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
             return connections.containsKey(node);
         }
 
-        public boolean addConnection(Node other, Integer cost) {
+        public boolean addConnection(Node<U> other, Integer cost) {
             connections.put(other, cost);
             return true;
         }
 
-        public void updateCost(Node otherNode, Integer cost) {
+        public void updateCost(Node<U> otherNode, Integer cost) {
             connections.put(otherNode, cost);
         }
 
-        public int getCost(Node otherNode) {
+        public int getCost(Node<U> otherNode) {
             Integer cost = connections.get(otherNode);
 
             return cost != null ? cost : -1;
