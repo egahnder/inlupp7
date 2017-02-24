@@ -24,7 +24,7 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
 
         }
 
-        return edges/2;
+        return edges / 2;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
             return false;
         } else {
 
-            Node<T> node = new Node(newNode);
+            Node<T> node = new Node<>(newNode);
             nodes.put(newNode, node);
             return true;
         }
@@ -43,20 +43,21 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
     public boolean connect(T node1, T node2, int cost) {
         Node firstNode = nodes.get(node1);
         Node secondNode = nodes.get(node2);
+
         if (cost < 1) {
             return false;
+
         } else if (!nodes.containsKey(node1) || !nodes.containsKey(node2)) {
             return false;
+
         } else if (isConnected(node1, node2)) {
             firstNode.updateCost(secondNode, cost);
             secondNode.updateCost(firstNode, cost);
             return true;
 
         } else {
-
             firstNode.addConnection(secondNode, cost);
             secondNode.addConnection(firstNode, cost);
-
 
             return true;
         }
@@ -64,22 +65,23 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
 
     @Override
     public boolean isConnected(T node1, T node2) {
-        Node nodeToCheck = nodes.get(node1);
-        Node node2ToCheck = nodes.get(node2);
+        Node firstNode = nodes.get(node1);
+        Node secondNode = nodes.get(node2);
 
-        return nodeToCheck != null && node2ToCheck != null && nodeToCheck.hasConnection(node2ToCheck);
+        return firstNode != null && secondNode != null && firstNode.hasConnection(secondNode);
     }
 
     @Override
     public int getCost(T node1, T node2) {
         Node firstNode = nodes.get(node1);
         Node secondNode = nodes.get(node2);
+
         if (firstNode != null && secondNode != null) {
             return firstNode.getCost(secondNode);
+
         } else {
             return -1;
         }
-
     }
 
     @Override
@@ -87,15 +89,17 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
         HashSet<Node<T>> visitedNodes = new HashSet<>();
         Node currentNode = nodes.get(start);
         Node goalNode = nodes.get(end);
+
         if (currentNode == null || goalNode == null) {
-            return new ArrayList<T>();
+            return new ArrayList<>();
 
         } else {
-            Stack<Node<T>> stack = new Stack();
+            Stack<Node<T>> stack = new Stack<>();
 
             stack.push(currentNode);
+
             if (checkAndMarkVisited(currentNode, goalNode, visitedNodes)) {
-                return stack.stream().map(n -> n.getValue()).collect(Collectors.toList());
+                return stack.stream().map(node -> node.getValue()).collect(Collectors.toList());
             }
             while (!stack.isEmpty()) {
                 Node<T> nextNeighbour = currentNode.nextNeighbour(visitedNodes);
@@ -109,7 +113,7 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
                     currentNode = nextNeighbour;
                     boolean isGoal = checkAndMarkVisited(currentNode, goalNode, visitedNodes);
                     if (isGoal) {
-                        return stack.stream().map(n -> n.getValue()).collect(Collectors.toList());
+                        return stack.stream().map(node -> node.getValue()).collect(Collectors.toList());
                     }
 
                 }
@@ -176,24 +180,24 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
         PriorityQueue<Connection<T>> connections = new PriorityQueue<>();
         UndirectedGraph<T> newGraph = new MyUndirectedGraph<T>();
         HashSet<Node<T>> connected = new HashSet<>();
-        if (nodes.keySet().iterator().hasNext()){
+        if (nodes.keySet().iterator().hasNext()) {
             Node<T> first = nodes.values().iterator().next();
             newGraph.add(first.getValue());
             connections.addAll(first.connectify());
             connected.add(first);
-            while (!connections.isEmpty()){
+            while (!connections.isEmpty()) {
                 Connection<T> smallest = connections.poll();
                 Set<Node<T>> pair = smallest.getPair().getPair();
                 Iterator<Node<T>> it = pair.iterator();
                 Node<T> firstNode = it.next();
-                if (it.hasNext()){
+                if (it.hasNext()) {
                     Node<T> secondNode = it.next();
-                    if (connected.contains(firstNode) ^ connected.contains(secondNode)){
-                        if(!newGraph.add(firstNode.getValue())){
+                    if (connected.contains(firstNode) ^ connected.contains(secondNode)) {
+                        if (!newGraph.add(firstNode.getValue())) {
                             newGraph.add(secondNode.getValue());
                             connected.add(secondNode);
                             connections.addAll(secondNode.connectify());
-                        }else{
+                        } else {
                             connected.add(firstNode);
                             connections.addAll(firstNode.connectify());
                         }
@@ -256,32 +260,35 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
             return null;
         }
 
-        private Collection<Connection<U>> connectify(){
+        private Collection<Connection<U>> connectify() {
             Collection<Connection<U>> newConnections = new ArrayList<>();
-            for (Entry<Node<U>, Integer> entry : connections.entrySet()){
+            for (Entry<Node<U>, Integer> entry : connections.entrySet()) {
                 UnorderedPair<U> pair = new UnorderedPair<U>(this, entry.getKey());
                 newConnections.add(new Connection<U>(pair, entry.getValue()));
             }
             return newConnections;
         }
     }
-    private class UnorderedPair<P>{
+
+    private class UnorderedPair<P> {
         Set<Node<P>> pair = new HashSet<>();
-        private UnorderedPair(Node<P> cyclicRoute){
+
+        private UnorderedPair(Node<P> cyclicRoute) {
             pair.add(cyclicRoute);
         }
 
-        private UnorderedPair(Node<P> first, Node<P> second){
+        private UnorderedPair(Node<P> first, Node<P> second) {
             pair.add(first);
             pair.add(second);
         }
-        private Set<Node<P>> getPair(){
+
+        private Set<Node<P>> getPair() {
             return pair;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof UnorderedPair){
+            if (obj instanceof UnorderedPair) {
                 UnorderedPair tmp = (UnorderedPair) obj;
                 Set objPair = tmp.getPair();
                 return pair.equals(objPair);
@@ -296,10 +303,11 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
         }
     }
 
-    private class Connection<C> implements Comparable<Connection<C>>{
+    private class Connection<C> implements Comparable<Connection<C>> {
         UnorderedPair<C> pair;
         int cost = -1;
-        private Connection(UnorderedPair<C> pair, int cost){
+
+        private Connection(UnorderedPair<C> pair, int cost) {
             this.pair = pair;
             this.cost = cost;
         }
@@ -309,10 +317,11 @@ public class MyUndirectedGraph<T> implements UndirectedGraph<T> {
             return Integer.compare(cost, o.getCost());
         }
 
-        private UnorderedPair<C> getPair(){
+        private UnorderedPair<C> getPair() {
             return pair;
         }
-        private int getCost(){
+
+        private int getCost() {
             return cost;
         }
     }
